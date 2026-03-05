@@ -1,8 +1,7 @@
 import { db, collection, addDoc, serverTimestamp } from './firebase.js';
-import { getDocs, query, orderBy } from "firebase/firestore"; // Додаємо функції для читання
+import { getDocs, query, orderBy } from "firebase/firestore";
 import './style.css'
 
-// 1. База даних об'єктів (20 десертів) [cite: 4, 63]
 const desserts = [
   "Тирамісу", "Чизкейк", "Медовик", "Наполеон", "Шоколадний фондан",
   "Макарон", "Еклер з заварним кремом", "Пахлава", "Брауні", "Морозиво пломбір",
@@ -10,14 +9,14 @@ const desserts = [
   "Вафельний торт зі згущенкою", "Сирники зі сметаною", "Торт «Павлова»", "Червоний оксамит", "Пончики"
 ];
 
-let selected = []; // Вибір експерта (v=3) [cite: 5, 20]
+let selected = [];
+let chartInstance = null; // Для скидання графіка при оновленні
 
 const voteView = document.getElementById('vote-view');
 const adminView = document.getElementById('admin-view');
 const appDiv = document.querySelector('#app');
 const submitBtn = document.querySelector('#submit-btn');
 
-// --- НАВІГАЦІЯ ТА ПАРОЛЬ ---
 document.getElementById('show-vote-btn').onclick = () => {
     adminView.style.display = 'none';
     voteView.style.display = 'block';
@@ -28,13 +27,12 @@ document.getElementById('show-admin-btn').onclick = async () => {
     if (password === 'admin') {
         voteView.style.display = 'none';
         adminView.style.display = 'block';
-        await fetchVotes(); // Завантажуємо записи
+        await fetchVotes();
     } else {
         alert("Доступ заборонено!");
     }
 };
 
-// --- ЛОГІКА ГОЛОСУВАННЯ ---
 function render() {
   appDiv.innerHTML = '';
   desserts.forEach(name => {
@@ -45,7 +43,7 @@ function render() {
     btn.onclick = () => handleSelect(name);
     appDiv.appendChild(btn);
   });
-  submitBtn.disabled = selected.length !== 3; // Рівно 3 об'єкти [cite: 5, 21]
+  submitBtn.disabled = selected.length !== 3;
 }
 
 function handleSelect(name) {
@@ -53,7 +51,7 @@ function handleSelect(name) {
   if (index !== -1) {
     selected.splice(index, 1);
   } else if (selected.length < 3) {
-    selected.push(name); // Пріоритетне порівняння [cite: 5, 26]
+    selected.push(name);
   }
   render();
 }
@@ -62,10 +60,10 @@ submitBtn.onclick = async () => {
   try {
     submitBtn.disabled = true;
     await addDoc(collection(db, "votes"), {
-      ranking: selected, // Збереження наданої інформації [cite: 10, 33]
+      ranking: selected,
       timestamp: serverTimestamp()
     });
-    alert("Ваш голос враховано анонімно!"); // Анонімність [cite: 7, 51]
+    alert("Ваш голос враховано анонімно!");
     selected = [];
     render();
   } catch (e) {
@@ -74,7 +72,8 @@ submitBtn.onclick = async () => {
   }
 };
 
-// --- ЛОГІКА АДМІНІСТРАТОРА (ВИВІД ЗАПИСІВ) ---
+// --- ЛОГІКА АДМІНІСТРАТОРА З ГІСТОГРАМОЮ ---
+// --- ЛОГІКА АДМІНІСТРАТОРА З ГІСТОГРАМОЮ ---
 async function fetchVotes() {
     const container = document.getElementById('results-container');
     container.innerHTML = '<p>Завантаження протоколу...</p>';
@@ -83,41 +82,80 @@ async function fetchVotes() {
         const q = query(collection(db, "votes"), orderBy("timestamp", "desc"));
         const querySnapshot = await getDocs(q);
         
-        if (querySnapshot.empty) {
-            container.innerHTML = '<p>Голосів ще немає.</p>';
-            return;
-        }
+        // 1. Обрахунок суми голосів (Зважена оцінка: 1 місце = 3 бали, 2 = 2, 3 = 1) [cite: 33]
+        const stats = {};
+        desserts.forEach(d => stats[d] = 0); // Ініціалізуємо всі 20 об'єктів [cite: 4, 63]
 
-        let tableHtml = `
-            <table border="1" style="width:100%; border-collapse: collapse; margin-top: 20px;">
-                <thead>
-                    <tr style="background: #f2f2f2;">
-                        <th>Час голосування</th>
-                        <th>1 місце (Пріоритет 1)</th>
-                        <th>2 місце (Пріоритет 2)</th>
-                        <th>3 місце (Пріоритет 3)</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-
+        const votesData = [];
         querySnapshot.forEach((doc) => {
             const data = doc.data();
-            const date = data.timestamp?.toDate().toLocaleString() || "Невідомо";
-            tableHtml += `
-                <tr>
-                    <td>${date}</td>
-                    <td><b>${data.ranking[0]}</b></td>
-                    <td>${data.ranking[1]}</td>
-                    <td>${data.ranking[2]}</td>
-                </tr>
-            `;
+            votesData.push(data);
+            data.ranking.forEach((name, index) => {
+                if (stats[name] !== undefined) {
+                    stats[name] += (3 - index); // Пріоритетне порівняння [cite: 5, 26]
+                }
+            });
         });
 
-        tableHtml += `</tbody></table>`;
-        container.innerHTML = tableHtml;
+        // 2. Створюємо Canvas з фіксованою висотою для надійності
+        container.innerHTML = `
+            <div style="position: relative; height:400px; width:100%; margin-bottom: 50px;">
+                <canvas id="resultsChart"></canvas>
+            </div>
+            <div id="table-holder"></div>
+        `;
+        
+        // 3. Побудова гістограми (даємо браузеру мить на рендер canvas)
+        setTimeout(() => {
+            const canvas = document.getElementById('resultsChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            if (chartInstance) chartInstance.destroy();
+            
+            chartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(stats),
+                    datasets: [{
+                        label: 'Загальна сума балів (зважений рейтинг)',
+                        data: Object.values(stats),
+                        backgroundColor: 'rgba(108, 92, 231, 0.7)',
+                        borderColor: '#6c5ce7',
+                        borderWidth: 1,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Важливо для стабільного відображення
+                    scales: {
+                        y: { 
+                            beginAtZero: true,
+                            title: { display: true, text: 'Бали' }
+                        },
+                        x: {
+                            ticks: { autoSkip: false, maxRotation: 45, minRotation: 45 }
+                        }
+                    }
+                }
+            });
+
+            // 4. Додавання таблиці протоколу [cite: 68]
+            const tableHolder = document.getElementById('table-holder');
+            let tableHtml = `<table class="results-table">
+                <thead><tr><th>Час</th><th>1 місце</th><th>2 місце</th><th>3 місце</th></tr></thead>
+                <tbody>`;
+            votesData.forEach((data) => {
+                const date = data.timestamp?.toDate().toLocaleString() || "Невідомо";
+                tableHtml += `<tr><td>${date}</td><td><b>${data.ranking[0]}</b></td><td>${data.ranking[1]}</td><td>${data.ranking[2]}</td></tr>`;
+            });
+            tableHtml += `</tbody></table>`;
+            tableHolder.innerHTML = tableHtml;
+        }, 50); // Затримка 50мс зазвичай вистачає
+
     } catch (e) {
-        container.innerHTML = `<p style="color:red;">Помилка доступу до даних: ${e.message}</p>`;
+        container.innerHTML = `<p style="color:red;">Помилка: ${e.message}</p>`;
     }
 }
 

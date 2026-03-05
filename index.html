@@ -5,10 +5,24 @@
     <title>Dessert Priority Voting</title>
 </head>
 <body>
-    <h1>Оберіть 3 найсмачніші десерти (в порядку пріоритету)</h1>
-    <div id="app">
+    <nav style="margin-bottom: 20px; text-align: center;">
+        <button id="show-vote-btn">Голосування</button>
+        <button id="show-admin-btn">Адмін-панель</button>
+    </nav>
+
+    <section id="vote-view">
+        <h1>Оберіть 3 найсмачніші десерти (в порядку пріоритету)</h1>
+        <div id="app"></div>
+        <button id="submit-btn" disabled>Відправити голос</button>
+    </section>
+
+    <section id="admin-view" style="display: none;">
+        <h1>Протокол результатів голосування</h1>
+        <div id="results-container">
+            <p>Завантаження даних...</p>
         </div>
-    <button id="submit-btn" disabled>Відправити голос</button>
+    </section>
+
     <script type="module" src="/src/main.js"></script>
 </body>
 </html>

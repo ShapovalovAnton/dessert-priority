@@ -156,3 +156,165 @@ h1 {
   cursor: not-allowed;
 }
 
+/* --- СТИЛІ ТІЛЬКИ ДЛЯ НОВИХ ЕЛЕМЕНТІВ --- */
+
+/* Контейнер імені */
+.name-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+#expert-name {
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 400px;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    outline: none;
+}
+
+#expert-name:focus {
+    border-color: var(--primary);
+}
+
+/* Навігація */
+.main-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.main-nav button {
+    background: #eee;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.main-nav button:hover {
+    background: #ddd;
+}
+
+/* Картки евристик для Лаб 2 */
+#heuristics-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 800px;
+    margin: 0 auto 30px auto;
+}
+
+.heuristic-card {
+    background: white;
+    border: 2px solid #eee;
+    padding: 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    font-size: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: 0.2s;
+}
+
+.heuristic-card:hover {
+    border-color: #00b894; /* Зелений для Лаб 2 */
+}
+
+.heuristic-card.active {
+    border-color: #00b894;
+    background-color: #e6fffa;
+}
+
+#submit-lab2-btn {
+    background-color: #00b894; /* Зелена кнопка для Лаб 2 */
+    display: block;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+}
+
+#submit-lab2-btn:disabled {
+    background-color: #b2bec3;
+    cursor: not-allowed;
+}
+
+/* --- СТИЛІ ДЛЯ ЛАБОРАТОРНОЇ 2 --- */
+
+/* Контейнер для евристик — тепер у стовпчик */
+.heuristics-grid {
+    display: flex;
+    flex-direction: column; /* Ставить елементи один під одним */
+    gap: 15px;
+    max-width: 800px; /* Обмежуємо ширину для зручності читання */
+    margin: 0 auto 40px auto;
+}
+
+/* Картка евристики */
+.heuristic-card {
+    background: var(--card-bg);
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 20px 25px;
+    text-align: left; /* Текст зліва зручніший для довгих речень */
+    font-size: 1.1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+}
+
+.heuristic-card:hover {
+    transform: translateX(5px); /* Легкий зсув вбік при наведенні */
+    border-color: #00b894;
+}
+
+.heuristic-card.active {
+    border-color: #00b894; /* Зелений колір для Лаб 2 */
+    background: #e6fffa;
+    color: #00b894;
+    font-weight: 700;
+}
+
+/* Кнопка відправки для Лаб 2 */
+#submit-h-btn {
+    display: block;
+    width: 100%;
+    max-width: 350px;
+    margin: 0 auto;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    background: #00b894; /* Зелений акцент для відмінності від Лаб 1 */
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 184, 148, 0.3);
+}
+
+#submit-h-btn:hover:not(:disabled) {
+    background: #00a383;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 184, 148, 0.4);
+}
+
+#submit-h-btn:disabled {
+    background: #b2bec3;
+    box-shadow: none;
+    cursor: not-allowed;
+}

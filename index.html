@@ -2,26 +2,32 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Dessert Priority Voting</title>
+    <title>Dessert Priority Voting - Labs 1 & 2</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <nav style="margin-bottom: 20px; text-align: center;">
-        <button id="show-vote-btn">Голосування</button>
-        <button id="show-admin-btn">Адмін-панель</button>
+    <nav class="nav-container">
+        <button id="btn-lab1">Лабораторна 1</button>
+        <button id="btn-lab2">Лабораторна 2</button>
+        <button id="btn-admin">Адмін-панель</button>
     </nav>
 
-    <section id="vote-view">
-        <h1>Оберіть 3 найсмачніші десерти (в порядку пріоритету)</h1>
+    <section id="lab1-view">
+        <h1>Лаб 1: Ранжування десертів (3 об'єкти)</h1>
         <div id="app"></div>
-        <button id="submit-btn" disabled>Відправити голос</button>
+        <button id="submit-btn" disabled>Відправити вибір десертів</button>
+    </section>
+
+    <section id="lab2-view" style="display: none;">
+        <h1>Лаб 2: Вибір евристик для відсіювання</h1>
+        <p>Оберіть 2-3 евристики, які слід застосувати першими </p>
+        <div id="heuristics-list" class="heuristics-grid"></div>
+        <button id="submit-h-btn" disabled>Відправити вибір евристик</button>
     </section>
 
     <section id="admin-view" style="display: none;">
-        <h1>Протокол результатів голосування</h1>
-        <div id="results-container">
-            <p>Завантаження даних...</p>
-        </div>
+        <h1>Протокол результатів</h1>
+        <div id="results-container"></div>
     </section>
 
     <script type="module" src="/src/main.js"></script>
